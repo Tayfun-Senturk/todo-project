@@ -100,4 +100,25 @@ class TodoController extends Controller
             'message' => 'Todo silindi'
         ], 204);
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->query('q');
+            
+        if (!$query) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Arama belirtilmedi'
+            ], 400);
+        }
+
+        $todos = Todo::where('title', 'like', "%{$query}%")
+                ->orWhere('description', 'like', "%{$query}%")
+                ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $todos
+        ]);
+    }
 }
