@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreTodoRequest;
 use App\Models\Todo;
-
+use App\Http\Requests\UpdateTodoRequest;
 
 class TodoController extends Controller
 {
@@ -59,9 +59,24 @@ class TodoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateTodoRequest $request,string $id)
     {
-        //
+        $todo = Todo::find($id);
+
+        if (!$todo) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Todo bulunamadi'
+            ], 404);
+        }
+
+        $todo->update($request->validated());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Todo güncellendi',
+            'data' => $todo
+        ]);
     }
 
     /**
