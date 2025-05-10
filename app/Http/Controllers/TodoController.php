@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreTodoRequest;
 use App\Models\Todo;
 use App\Http\Requests\UpdateTodoRequest;
+use App\Http\Requests\UpdateTodoStatusRequest;
+
 
 class TodoController extends Controller
 {
@@ -120,5 +122,30 @@ class TodoController extends Controller
             'status' => 'success',
             'data' => $todos
         ]);
+    }
+
+    public function updateStatus(UpdateTodoStatusRequest $request, string $id)
+    {
+        $todo = Todo::find($id);
+        
+        if (!$todo) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Todo bulunamadi'
+            ], 404);
+        }
+
+        $todo->status = $request->validated()['status'];
+        $todo->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Todo durumu güncellendi',
+            'data' => [
+                'id' => $todo->id,
+                'status' => $todo->status,
+                'updated_at' => $todo->updated_at
+            ]
+        ]); 
     }
 }

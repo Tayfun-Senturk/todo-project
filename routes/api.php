@@ -9,3 +9,4 @@ Route::get('/todos/{id}',[TodoController::class,'show']);
 Route::put('/todos/{id}',[TodoController::class,'update']);
 Route::delete('/todos/{id}',[TodoController::class,'destroy']);
 Route::post('/todos',[TodoController::class,'store']);
+Route::patch('/todos/{id}/status', [TodoController::class, 'updateStatus']);
