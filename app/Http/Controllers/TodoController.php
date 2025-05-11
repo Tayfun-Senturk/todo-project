@@ -28,12 +28,18 @@ class TodoController extends Controller
 
     public function store(StoreTodoRequest $request)
     {
-        $todo = Todo::create($request->validated());
+        $validated = $request->validated();
+
+        $todo = Todo::create($validated);
+
+        if (isset($validated['category_ids'])) {
+            $todo->categories()->attach($validated['category_ids']);
+        }
     
         return response()->json([
             'status' => 'success',
             'message' => 'Todo başariyla oluşturuldu',
-            'data' => $todo
+            'data' => $todo->load('categories')
         ], 201);
     }
     
@@ -72,12 +78,18 @@ class TodoController extends Controller
             ], 404);
         }
 
-        $todo->update($request->validated());
+        $validated = $request->validated();
+
+        $todo->update($validated);
+
+        if (isset($validated['category_ids'])) {
+            $todo->categories()->sync($validated['category_ids']);
+        }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Todo güncellendi',
-            'data' => $todo
+            'data' => $todo->load('categories')
         ]);
     }
 

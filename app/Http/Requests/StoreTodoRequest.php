@@ -27,6 +27,8 @@ class StoreTodoRequest extends FormRequest
             'status' => 'nullable|in:pending,in_progress,completed,cancelled',
             'priority' => 'nullable|in:low,medium,high',
             'due_date' => 'nullable|date|after:today',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'exists:categories,id'
         ];
     }
 }
