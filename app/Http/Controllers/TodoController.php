@@ -13,13 +13,35 @@ class TodoController extends Controller
 {
     /**
      * Display a listing of the resource.
-     */
-    public function index()
+     */ 
+    public function index(Request $request)
     {
-        $todos = Todo::all();
-        
-        return response()->json(['status' => 'success', 'data' => $todos]);
+        $query = Todo::query();
+    
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+    
+        if ($request->has('priority')) {
+            $query->where('priority', $request->priority);
+        }
+    
+        if ($request->has('category_id')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->category_id);
+            });
+        }
+    
+        $perPage = $request->get('limit', 5); // default: 5
+        $todos = $query->with('categories')->paginate($perPage);
+    
+        return response()->json([
+            'status' => 'success',
+            'data' => $todos
+        ]);
     }
+    
+    
 
     /**
      * Store a newly created resource in storage.

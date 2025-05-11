@@ -1,59 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useEffect, useState } from "react";
-
-const AddTodoForm = () => {
-  const initialValues = {
-    title: "",
-    description: "",
-    status: "pending",
-    priority: "medium",
-    due_date: "",
-    category_ids: [],
-  };
-
+const EditTodoForm = ({ todo, onClose, onUpdated }) => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     axios
       .get("http://localhost:8000/api/categories")
-      .then((res) => {
-        setCategories(res.data.data);
-      })
-      .catch((err) => {
-        console.error("Kategoriler alınamadı:", err);
-        toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
-      });
-  }, []); 
+      .then((res) => setCategories(res.data.data))
+      .catch((err) => console.error("Kategori çekilemedi:", err));
+  }, []);
 
   const validationSchema = Yup.object({
-    title: Yup.string().required("Başlık zorunlu").min(3).max(100),
+    title: Yup.string().required("Başlık gerekli").min(3).max(100),
     description: Yup.string().max(500),
     status: Yup.string().oneOf(["pending", "in_progress", "completed", "cancelled"]),
     priority: Yup.string().oneOf(["low", "medium", "high"]),
     due_date: Yup.date().nullable(),
   });
 
-  const onSubmit = (values, { resetForm }) => {
-    axios
-      .post("http://localhost:8000/api/todos", values)
-      .then((res) => {
-        toast.success("Todo başarıyla eklendi!");
+  const initialValues = {
+    title: todo.title || "",
+    description: todo.description || "",
+    status: todo.status || "pending",
+    priority: todo.priority || "medium",
+    due_date: todo.due_date?.slice(0, 10) || "",
+    category_ids: todo.categories?.map((cat) => cat.id) || [],
+  };
 
-        resetForm();
+  const onSubmit = (values) => {
+    axios
+      .put(`http://localhost:8000/api/todos/${todo.id}`, values)
+      .then(() => {
+        toast.success("Todo güncellendi!");
+        onUpdated();
+        onClose();
       })
       .catch((err) => {
-        console.error("Todo eklenirken hata:", err);
+        console.error("Güncelleme hatası:", err);
         toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
       });
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow max-w-md mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-4">Yeni Todo Ekle</h2>
+    <div className="bg-white p-6 rounded shadow max-w-md mx-auto mt-8 border border-gray-200">
+      <h3 className="text-2xl font-bold mb-4">Todo Düzenle</h3>
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         <Form>
           <div className="mb-4">
@@ -126,16 +119,25 @@ const AddTodoForm = () => {
             </Field>
           </div>
 
-          <button
-            type="submit"
-            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mt-4"
-          >
-            Ekle
-          </button>
+          <div className="flex gap-4 mt-4">
+            <button
+              type="submit"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              Kaydet
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+            >
+              İptal
+            </button>
+          </div>
         </Form>
       </Formik>
     </div>
   );
 };
 
-export default AddTodoForm;
+export default EditTodoForm;
