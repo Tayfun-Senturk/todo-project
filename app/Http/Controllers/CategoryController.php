@@ -72,4 +72,27 @@ class CategoryController extends Controller
             'message' => 'Kategori silindi'
         ], 204);
     }
+
+    public function todos($id, Request $request)
+    {
+        $category = Category::with(['todos.categories'])
+            ->find($id);
+
+        if (!$category) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kategori bulunamadı',
+            ], 404);
+        }
+
+        $todos = $category->todos()
+            ->whereNull('deleted_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $todos,
+        ]);
+    }
 }

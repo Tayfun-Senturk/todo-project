@@ -18,7 +18,10 @@ const EditTodoForm = ({ todo, onClose, onUpdated }) => {
     description: Yup.string().max(500),
     status: Yup.string().oneOf(["pending", "in_progress", "completed", "cancelled"]),
     priority: Yup.string().oneOf(["low", "medium", "high"]),
-    due_date: Yup.date().nullable(),
+    due_date: Yup.date()
+  .nullable()
+  .min(new Date(), "Tarih bugünden sonra olmalı"),
+
   });
 
   const initialValues = {
@@ -45,34 +48,34 @@ const EditTodoForm = ({ todo, onClose, onUpdated }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow max-w-md mx-auto mt-8 border border-gray-200">
-      <h3 className="text-2xl font-bold mb-4">Todo Düzenle</h3>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded shadow max-w-md mx-auto mt-8 border border-gray-200 dark:border-gray-700">
+      <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Todo Düzenle</h3>
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         <Form>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Başlık</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Başlık</label>
             <Field
               name="title"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             />
             <ErrorMessage name="title" component="div" className="text-red-500 text-sm mt-1" />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Açıklama</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Açıklama</label>
             <Field
               name="description"
               as="textarea"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Durum</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Durum</label>
             <Field
               name="status"
               as="select"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               <option value="pending">pending</option>
               <option value="in_progress">in_progress</option>
@@ -82,11 +85,11 @@ const EditTodoForm = ({ todo, onClose, onUpdated }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Öncelik</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Öncelik</label>
             <Field
               name="priority"
               as="select"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               <option value="low">low</option>
               <option value="medium">medium</option>
@@ -95,21 +98,21 @@ const EditTodoForm = ({ todo, onClose, onUpdated }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Teslim Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Teslim Tarihi</label>
             <Field
               name="due_date"
               type="date"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Kategoriler</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Kategoriler</label>
             <Field
               name="category_ids"
               as="select"
               multiple
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -129,7 +132,7 @@ const EditTodoForm = ({ todo, onClose, onUpdated }) => {
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+              className="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-600"
             >
               İptal
             </button>

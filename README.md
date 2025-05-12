@@ -1,61 +1,170 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Todo App
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Laravel API × React UI — built as part of the **PHP + React Todo Case Study** (May 2025)
 
-## About Laravel
+A fast, keyboard‑friendly task manager with a Kanban board, category tags and tidy API. I wrote it to prove that solid structure, clean code and a bit of Tailwind can go a long way.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ⚡ 30‑Second Tour
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Dark‑mode Kanban          | Classic table view | Category management |
+| ------------------------- | ------------------ | ------------------- |
+| *(drag, drop, celebrate)* | *(endless scroll)* | *(colour‑coded)*    |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Feature Highlights
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+* **Drag‑and‑drop Kanban** — updates status instantly with a PATCH request.
+* **Search & filters** — text search plus status / priority / category combos.
+* **Tags** — every todo can live in multiple colour‑coded categories.
+* **Stats endpoint** — totals per status, priority & category for dashboards.
+* Friendly dark/light theme switch, toast feedback, and skeleton loaders.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Bonus Extras
 
-## Laravel Sponsors
+These are beyond the bare‑minimum scope of the case study:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+* **Dashboard counters** refresh every 30 s via SWR polling.
+* **Category manager** with colour picker and inline validation.
 
-### Premium Partners
+> What’s missing?  Auth, file uploads and offline mode — see the roadmap.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## Under the Hood
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Layer | Stack                                         |
+| ----- | --------------------------------------------- |
+| API   | Laravel 11, PHP 8.3, MySQL 8                  |
+| Front | React 18, Vite, Tailwind CSS, React Router v6 |
+| Tests | PHPUnit, Cypress, Jest + RTL                  |
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Local Setup
 
-## Security Vulnerabilities
+### 1. Clone & Boot the API
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cp .env.example .env
+composer install
+php artisan key:generate
+# edit .env with your DB creds
+php artisan migrate --seed
+php artisan serve      # → http://localhost:8000
+```
 
-## License
+### 2. Fire up the Frontend
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+cd frontend
+npm i
+npm run dev           
+```
+
+The dev server proxies `/api` calls to the Laravel port — no extra config.
+
+---
+
+## Running the App
+
+1. Launch both servers (see **Local Setup**) and open **[http://localhost:5173](http://localhost:5173)**.
+2. Click **➕ New Todo** to create your first task.
+3. Drag cards between Kanban lanes; the status is PATCH‑ed behind the scenes.
+4. Use the **Search** box or **Filters** drawer to find tasks by text, status, priority or tag.
+5. Hit the **Categories** tab in the navbar to add, rename, recolour or delete categories — all edits persist instantly.
+6. Visit **dashboard** to view the live counters sourced from the `/stats` endpoints.
+
+*(Everything is responsive; it works nicely on mobile.)*
+
+---
+
+## API Cheat Sheet
+
+All routes live under `/api` and reply with a simple envelope:
+
+```json
+{ "status": "success", "data": … }
+```
+
+### Todos
+
+| Method | Path                 | Purpose                     |
+| ------ | -------------------- | --------------------------- |
+| GET    | `/todos`             | List (pagination & filters) |
+| GET    | `/todos/search`      | Full‑text search            |
+| GET    | `/todos/{id}`        | Single todo                 |
+| POST   | `/todos`             | Create                      |
+| PUT    | `/todos/{id}`        | Update all fields           |
+| PATCH  | `/todos/{id}/status` | Just the status             |
+| DELETE | `/todos/{id}`        | Soft‑delete                 |
+
+### Categories
+
+| Method | Path                     | Purpose                         |
+| ------ | ------------------------ | ------------------------------- |
+| GET    | `/categories`            | List categories                 |
+| GET    | `/categories/{id}`       | Single category                 |
+| POST   | `/categories`            | Create category                 |
+| PUT    | `/categories/{id}`       | Update category                 |
+| DELETE | `/categories/{id}`       | Delete category                 |
+| GET    | `/categories/{id}/todos` | Todos that belong to a category |
+
+### Stats
+
+| Method | Path                | Purpose             |
+| ------ | ------------------- | ------------------- |
+| GET    | `/stats/todos`      | Totals per status   |
+| GET    | `/stats/categories` | Totals per category |
+| GET    | `/stats/priorities` | Totals per priority |
+
+#### Example Create Request
+
+```http
+POST /api/todos
+{
+  "title": "Finish README",
+  "description": "the human‑sounding one",
+  "priority": "high",
+  "status": "in_progress",
+  "due_date": "2025-05-25",
+  "category_ids": [2,3]
+}
+```
+
+Response → 201 with the full record and its attached categories.
+
+---
+
+## Scripts
+
+```bash
+# backend
+php artisan test        # PHPUnit unit & API tests
+
+# frontend
+npm run test            # Jest + RTL
+npm run cypress         # end‑to‑end suite
+```
+
+---
+
+## Roadmap
+
+* JWT auth & user accounts
+* PWA + offline support
+* File attachments (S3)
+
+---
+
+## Screenshots
+
+| Dashboard                                 | Category Management                         |
+| ----------------------------------------- | ------------------------------------------- |
+| ![Dashboard](./screenshots/dashboard.png) | ![Categories](./screenshots/categories.png) |
+
+| Kanban Board                        | Todo Details                                | Add Todo                                |
+| ----------------------------------- | ------------------------------------------- | --------------------------------------- |
+| ![Kanban](./screenshots/kanban.png) | ![Todo Modal](./screenshots/todo-modal.png) | ![Add Todo](./screenshots/add-todo.png) |

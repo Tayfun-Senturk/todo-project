@@ -16,28 +16,46 @@ class TodoController extends Controller
      */ 
     public function index(Request $request)
     {
-        $query = Todo::query();
-    
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
+        $page = (int) $request->query('page', 1);
+        $perPage = min((int) $request->query('per_page', 5), 50);
+        $sort = $request->query('sort', 'created_at');
+        $order = strtolower($request->query('order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        $allowedSorts = ['created_at', 'due_date', 'priority'];
+        if (!in_array($sort, $allowedSorts, true)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Geçersiz sort alanı: $sort",
+            ], 422);
         }
-    
-        if ($request->has('priority')) {
-            $query->where('priority', $request->priority);
-        }
-    
-        if ($request->has('category_id')) {
-            $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('categories.id', $request->category_id);
-            });
-        }
-    
-        $perPage = $request->get('limit', 5); // default: 5
-        $todos = $query->with('categories')->paginate($perPage);
-    
+
+        $query = Todo::with('categories')
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->priority))
+            ->when($request->filled('category_id'), function ($q) use ($request) {
+                $q->whereHas('categories', function ($q) use ($request) {
+                    $q->where('categories.id', $request->category_id);
+                });
+            })
+            ->orderBy($sort, $order);
+
+        $paginated = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $meta = [
+            'pagination' => [
+                'total' => $paginated->total(),
+                'per_page' => $paginated->perPage(),
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'from' => $paginated->firstItem(),
+                'to' => $paginated->lastItem(),
+            ],
+        ];
+
         return response()->json([
             'status' => 'success',
-            'data' => $todos
+            'data' => $paginated->items(),
+            'meta' => $meta
         ]);
     }
     
@@ -140,7 +158,10 @@ class TodoController extends Controller
     public function search(Request $request)
     {
         $query = $request->query('q');
-            
+        $status = $request->query('status');
+        $priority = $request->query('priority');
+        $category_id = $request->query('category_id');
+
         if (!$query) {
             return response()->json([
                 'status' => 'error',
@@ -148,9 +169,18 @@ class TodoController extends Controller
             ], 400);
         }
 
-        $todos = Todo::where('title', 'like', "%{$query}%")
-                ->orWhere('description', 'like', "%{$query}%")
-                ->get();
+        $todos = Todo::where(function($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%");
+            })
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($priority, fn($q) => $q->where('priority', $priority))
+            ->when($category_id, function($q) use ($category_id) {
+                $q->whereHas('categories', function($q) use ($category_id) {
+                    $q->where('categories.id', $category_id);
+                });
+            })
+            ->get();
 
         return response()->json([
             'status' => 'success',

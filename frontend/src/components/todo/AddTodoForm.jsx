@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 
-const AddTodoForm = () => {
+const AddTodoForm = ({ onAdded, onClose }) => {
   const initialValues = {
     title: "",
     description: "",
@@ -34,7 +34,10 @@ const AddTodoForm = () => {
     description: Yup.string().max(500),
     status: Yup.string().oneOf(["pending", "in_progress", "completed", "cancelled"]),
     priority: Yup.string().oneOf(["low", "medium", "high"]),
-    due_date: Yup.date().nullable(),
+    due_date: Yup.date()
+  .nullable()
+  .min(new Date(), "Tarih bugünden sonra olmalı"),
+
   });
 
   const onSubmit = (values, { resetForm }) => {
@@ -42,8 +45,11 @@ const AddTodoForm = () => {
       .post("http://localhost:8000/api/todos", values)
       .then((res) => {
         toast.success("Todo başarıyla eklendi!");
-
+        console.log(values);
         resetForm();
+        setTimeout(() => {
+          if (onAdded) onAdded();
+        }, 150);
       })
       .catch((err) => {
         console.error("Todo eklenirken hata:", err);
@@ -52,34 +58,47 @@ const AddTodoForm = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow max-w-md mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-4">Yeni Todo Ekle</h2>
-      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
+    <div className="relative bg-white dark:bg-gray-800 p-6 rounded shadow max-w-md mx-auto mt-8">
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xl font-bold"
+          aria-label="Kapat"
+        >
+          ×
+        </button>
+      )}
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Yeni Todo Ekle</h2>
+      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={(values, helpers) => {
+        onSubmit(values, helpers);
+        if (onClose) onClose();
+      }}>
         <Form>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Başlık</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Başlık</label>
             <Field
               name="title"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             />
             <ErrorMessage name="title" component="div" className="text-red-500 text-sm mt-1" />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Açıklama</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Açıklama</label>
             <Field
               name="description"
               as="textarea"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Durum</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Durum</label>
             <Field
               name="status"
               as="select"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               <option value="pending">pending</option>
               <option value="in_progress">in_progress</option>
@@ -89,11 +108,11 @@ const AddTodoForm = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Öncelik</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Öncelik</label>
             <Field
               name="priority"
               as="select"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               <option value="low">low</option>
               <option value="medium">medium</option>
@@ -102,21 +121,21 @@ const AddTodoForm = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Teslim Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Teslim Tarihi</label>
             <Field
               name="due_date"
               type="date"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Kategoriler</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Kategoriler</label>
             <Field
               name="category_ids"
               as="select"
               multiple
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>

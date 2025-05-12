@@ -9,7 +9,7 @@ use App\Models\Category;
 class Todo extends Model
 {
     use SoftDeletes;
-    protected $with = ['categories'];
+
 
 
     protected $fillable = [
