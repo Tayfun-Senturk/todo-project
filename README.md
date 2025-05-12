@@ -163,7 +163,7 @@ npm run cypress         # end‑to‑end suite
 
 | Dashboard                                 | Category Management                         |
 | ----------------------------------------- | ------------------------------------------- |
-| ![Dashboard](./screenshots/dashboard.png) | ![Categories](./screenshots/categories.png) |
+| ![Dashboard](./screenshots/dashboardd.png) | ![Categories](./screenshots/categories.png) |
 
 | Kanban Board                        | Todo Details                                | Add Todo                                |
 | ----------------------------------- | ------------------------------------------- | --------------------------------------- |
